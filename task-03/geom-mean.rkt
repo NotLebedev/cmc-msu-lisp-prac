@@ -1,5 +1,7 @@
 #lang racket
 
+(provide task-03)
+
 ;; For a given list of geometric vetors as lists
 ;; return geometric mean of their lengths
 ;;

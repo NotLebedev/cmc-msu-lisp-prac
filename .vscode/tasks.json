@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"command": "Get-ChildItem -Recurse *test.rkt | Foreach {racket $_.fullname}",
+			"label": "racket test",
+			"problemMatcher": [],
+			"icon": {
+				"id": "code",
+				"color": "terminal.ansiCyan"
+			}
+		}
+	]
+}
