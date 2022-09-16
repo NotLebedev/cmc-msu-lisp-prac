@@ -1,5 +1,7 @@
 #lang racket/base
 
+(provide 2n!-list)
+
 ;; For integer n > 0 evaluate list of first n even numbers factorials
 ;; e.i. (2, 24, 720, ... (2n)!), for all other n returns empty list.
 (define (2n!-list n)
@@ -22,5 +24,3 @@
       (reverse (fac-even-list (* 2 n)))
       ;; If `n` is non-integer return empty list
       '()))
-
-(2n!-list 5)
