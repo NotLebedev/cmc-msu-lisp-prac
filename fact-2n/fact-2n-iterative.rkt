@@ -21,7 +21,6 @@
       ;; To return first `n` even numbers 2 * n numbers total need to be evaluated
       (reverse (fac-even-list (* 2 n)))
       ;; If `n` is non-integer return empty list
-      '())
-  )
+      '()))
 
 (2n!-list 5)
