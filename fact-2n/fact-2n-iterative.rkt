@@ -1,31 +1,27 @@
 #lang racket/base
 
-(define (fact3 n)
-(let loop ((i n) (result 1))
-(if (< i 2) result
-(loop (- i 1) (* i result))))
-)
-
-
+;; For integer n > 0 evaluate list of first n even numbers factorials
+;; e.i. (2, 24, 720, ... (2n)!), for all other n returns empty list.
 (define (2n!-list n)
-  ; Append `element` to `list` if `number` is even
-  (define (cons-if-even number list element)
-    (if (even? number) (cons element list) list))
-
-  ; Calculate first `n` fibonacci numbers and return list of
-  ; even indexed among them.
+  ;; Main routine.
+  ;; Calculate first `n` fibonacci numbers and return list of
+  ;; those on even indices among them in descending order
   (define (fac-even-list n)
-    (let loop ((i (- n 2)) (result '()) (prev 1) (max n))
-      (if (< i 2)
+    ;; `i` - increasing counter, that is equal to last multiplication done
+    ;; `element` - next element to inser in list
+    ;; `result` - list accumulating items in reverse order
+    ;; `max` - maximum value for counter. Because 1 is skipped it must
+    ;;         be equal to n + 2
+    (let loop ((i 2) (element 2) (result '()) (max (+ n 2)))
+      (if (>= i max)
           result
-          (loop (- i 1) (cons-if-even (+ i 1) result prev) (* (- max i) prev) n)
-   )))
+          (loop (+ i 2) (* element (+ i 2) (+ i 1)) (cons element result) max))))
 
-  ; If `n` is odd return empty list
-  (if (odd? n) '()
-      ; If `n` is even calculate how many numbers yield
-      ; `n` even + 0! and 1!
-      (reverse (fac-even-list (+ 4 (* n 2)))))
-)
+  (if (and (integer? n) (> n 0))
+      ;; To return first `n` even numbers 2 * n numbers total need to be evaluated
+      (reverse (fac-even-list (* 2 n)))
+      ;; If `n` is non-integer return empty list
+      '())
+  )
 
-(2n!-list 8)
+(2n!-list 5)
