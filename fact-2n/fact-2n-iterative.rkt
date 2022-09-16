@@ -10,7 +10,7 @@
     ;; `i` - increasing counter, that is equal to last multiplication done
     ;; `element` - next element to inser in list
     ;; `result` - list accumulating items in reverse order
-    ;; `max` - maximum value for counter. Because 1 is skipped it must
+    ;; `max` - maximum value for counter. Because 0! is skipped it must
     ;;         be equal to n + 2
     (let loop ((i 2) (element 2) (result '()) (max (+ n 2)))
       (if (>= i max)
