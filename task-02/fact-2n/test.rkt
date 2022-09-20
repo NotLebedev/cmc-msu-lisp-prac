@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require rackunit "fact-2n-iterative.rkt" "fact-2n-recursive.rkt")
+(require rackunit "code.rkt")
 
 (test-begin
  (define functions (list 2n!-list 2n!-list-recursive))
