@@ -1,6 +1,6 @@
 #lang racket/base
 
-(provide list-fib-squares-a fib-list-clever)
+(provide list-fib-squares-a list-fib-squares-b)
 
 ;; Returns a list of squares of first n fibonacci
 ;; numbers in ascending order
@@ -16,7 +16,7 @@
   (define (square x) (* x x))
   (reverse (map square (fib-list n))))
 
-(define (fib-list-clever n)
+(define (list-fib-squares-b n)
   ;; This fold uses presence of first parameter as counter
   ;; but actual values are ignored
   (define (fib-fold _ result)
