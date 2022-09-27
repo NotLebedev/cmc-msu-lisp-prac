@@ -19,4 +19,5 @@
   (cond
     [(= h 0) (height-0 tree)]
     [(= h 1) (height-1 tree)]
-    [else (height-n tree h)]))
+    [(> h 1) (height-n tree h)]
+    [else #f]))
