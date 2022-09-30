@@ -1,10 +1,10 @@
 #lang racket/base
 
 (require "../../lib/vec-tree.rkt")
-(provide task-4)
+(provide task-5)
 
 ;; Checks if tree is a fibbonacci tree of height h
-(define (task-4 tree h)
+(define (task-5 tree h)
   (define height-0 empty-tree?)
   (define (height-1 tree)
     (and
