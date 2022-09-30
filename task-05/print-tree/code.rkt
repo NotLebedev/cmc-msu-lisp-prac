@@ -2,8 +2,6 @@
 
 (require "../../lib/vec-tree.rkt")
 
-
-
 (define (print-tree-by-level-desc tree)
   ;; Cons `what` to `to` if `cond` is #t
   (define (cons-if cond what to)
@@ -57,8 +55,14 @@
 
 (print-tree-by-level-desc #())
 
+(display "\n")
+
 (print-tree-by-level-desc #(1 #() #()))
 
+(display "\n")
+
 (print-tree-by-level-desc #(10 #(21 #() #()) #(22 #() #())))
+
+(display "\n")
 
 (print-tree-by-level-desc #(10 #(21 #(31 #() #()) #(32 #() #())) #(22 #() #(34 #() #()))))
