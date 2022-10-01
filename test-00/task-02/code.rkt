@@ -3,9 +3,15 @@
 (require racket/vector)
 (provide taskII)
 
-;; Линейно-итеративное решение. Строятся последовательно списки вершин для
-;; каждого уровня и вычисляется площадь закрашенная на данном уровне.
+;; Классическая рекурсия для рекурсивной структуры данных
 (define (taskII t s)
+  (if (number? t)
+      (* t s)
+      (foldl + 0 (map (λ (x) (taskII x (/ s 4))) (vector->list t)))))
+
+;; Ради шутки "линейно-итеративное" решение. Строятся последовательно списки вершин для
+;; каждого уровня и вычисляется площадь закрашенная на данном уровне.
+(define (taskII-linear t s)
   ;; Calculate area of this level for each node
   ;; without regards to the next level (which will be
   ;; handled later). Basically only looks at numbers
