@@ -1,6 +1,5 @@
 #lang racket/base
 
-(require "../../lib/vec-tree.rkt")
 (provide taskI)
 
 ;; В принципе посетить все элементы списка меньше чем за один проход нельзя.
