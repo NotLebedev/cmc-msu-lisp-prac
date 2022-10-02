@@ -71,7 +71,7 @@
 
 ; замена лица во фразе
 (define (change-person phrase)
-  (many-replace-v1
+  (many-replace-v2
    		(build-replacement-pairs
                  '(am are)
                  '(are am)
@@ -98,6 +98,11 @@
 (define (build-replacement-pairs . pairs) pairs)
 (define (has-replacement? what replacement-pairs) (if (not (assoc what replacement-pairs)) #f #t))
 (define (get-replacement what replacement-pairs) (cadr (assoc what replacement-pairs)))
+(define (replace-or-keep what replacement-pairs)
+  (let ([result (assoc what replacement-pairs)])
+    (if (not result)
+        what
+        (cadr result))))
 
 ; осуществление всех замен в списке lst по ассоциативному списку replacement-pairs
 (define (many-replace replacement-pairs lst)
@@ -120,6 +125,13 @@
         (if (has-replacement? word replacement-pairs)
             (cons (get-replacement word replacement-pairs) (many-replace-v1 replacement-pairs tail))
             (cons word (many-replace-v1 replacement-pairs tail))))))
+
+(define (many-replace-v2 replacement-pairs lst)
+  (reverse
+   (let loop ([input lst] [output '()])
+     (if (null? input)
+         output
+         (loop (cdr input) (cons (replace-or-keep (car input) replacement-pairs) output))))))
 
 ; в Racket нет vector-foldl, реализуем для случая с одним вектором (vect-foldl f init vctr)
 ; у f три параметра i -- индекс текущего элемента, result -- текущий результат свёртки, elem -- текущий элемент вектора
