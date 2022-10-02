@@ -71,27 +71,33 @@
 
 ; замена лица во фразе
 (define (change-person phrase)
-  (many-replace
-   		'((am are)
-                  (are am)
-                  (i you)
-                  (me you)
-                  (mine yours)
-                  (my your)
-                  (myself yourself)
-                  (you i)
-                  (your my)
-                  (yours mine)
-                  (yourself myself)
-                  (we you)
-                  (us you)
-                  (our your)
-                  (ours yours)
-                  (ourselves yourselves)
-                  (yourselves ourselves)
-                  (shall will))
+  (many-replace-v1
+   		(build-replacement-pairs
+                 '(am are)
+                 '(are am)
+                 '(i you)
+                 '(me you)
+                 '(mine yours)
+                 '(my your)
+                 '(myself yourself)
+                 '(you i)
+                 '(your my)
+                 '(yours mine)
+                 '(yourself myself)
+                 '(we you)
+                 '(us you)
+                 '(our your)
+                 '(ours yours)
+                 '(ourselves yourselves)
+                 '(yourselves ourselves)
+                 '(shall will))
                 phrase)
   )
+
+;; Структура данных содержащая пары для замен местоимений
+(define (build-replacement-pairs . pairs) pairs)
+(define (has-replacement? what replacement-pairs) (if (not (assoc what replacement-pairs)) #f #t))
+(define (get-replacement what replacement-pairs) (cadr (assoc what replacement-pairs)))
 
 ; осуществление всех замен в списке lst по ассоциативному списку replacement-pairs
 (define (many-replace replacement-pairs lst)
@@ -106,6 +112,15 @@
               )
         )
   )
+
+(define (many-replace-v1 replacement-pairs lst)
+  (if (null? lst)
+      lst
+      (let ([word (car lst)] [tail (cdr lst)])
+        (if (has-replacement? word replacement-pairs)
+            (cons (get-replacement word replacement-pairs) (many-replace-v1 replacement-pairs tail))
+            (cons word (many-replace-v1 replacement-pairs tail))))))
+
 ; в Racket нет vector-foldl, реализуем для случая с одним вектором (vect-foldl f init vctr)
 ; у f три параметра i -- индекс текущего элемента, result -- текущий результат свёртки, elem -- текущий элемент вектора
 (define (vector-foldl f init vctr)
