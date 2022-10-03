@@ -4,6 +4,24 @@
 
 ; В учебных целях используется базовая версия Scheme
 
+(define (visit-doctor-v2 stop-word patients-cnt)
+  (call/cc
+   (λ (cc-exit)
+     (let loop ([idx 0])
+       (when (= idx patients-cnt) (cc-exit))
+       (print '(next!))
+       (display "\n")
+       (print '(who are you?))
+       (display "\n**")
+       (let ([name (car (read))])
+         (if (equal? name stop-word)
+             (begin
+               (print '(time to go home))
+               (cc-exit))
+             (begin
+               (visit-doctor name)
+               (loop (+ idx 1)))))))))
+
 ; основная функция, запускающая "Доктора"
 ; параметр name -- имя пациента
 (define (visit-doctor name)
