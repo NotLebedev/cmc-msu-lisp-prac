@@ -9,7 +9,7 @@
 (define (visit-doctor name)
   (printf "Hello, ~a!\n" name)
   (print '(what seems to be the trouble?))
-  (doctor-driver-loop name)
+  (doctor-driver-loop-v2 name #())
   )
 
 ; цикл диалога Доктора с пациентом
@@ -29,6 +29,21 @@
     )
   )
 
+;; Цикл диалога с Доктора с пацинетом
+;; `name` -- имя пациента
+;; `history` -- история диалога с пациентом
+(define (doctor-driver-loop-v2 name history)
+  (newline)
+  (print '**)
+  (let ([user-response (read)])
+    (cond
+      [(equal? user-response '(goodbye))
+       (printf "Goodbye, ~a!\n" name)
+       (print '(see you next week))]
+      [else
+       (print (reply-v2 user-response history))
+       (doctor-driver-loop-v2 name (vector-append history (vector user-response)))])))
+
 ; генерация ответной реплики по user-response -- реплике от пользователя
 (define (reply user-response)
   (case (random 0 2) ; с равной вероятностью выбирается один из двух способов построения ответа
@@ -37,6 +52,13 @@
 
     )
   )
+
+(define (reply-v2 user-response history)
+  ;; Рандомит в зависимости от того есть ли в истории хоть что-то
+  (case (random 0 (if (> (vector-length history) 0) 3 2))
+    ((0) (hedge-answer))
+    ((1) (qualifier-answer user-response))
+    ((2) (history-answer history))))
 
 ; 1й способ генерации ответной реплики -- случайный выбор одной из заготовленных фраз, не связанных с репликой пользователя
 (define (hedge-answer)
@@ -68,6 +90,11 @@
           (change-person user-response)
           )
   )
+
+
+(define (history-answer history)
+  (append '(earlier you said that)
+          (pick-random-vector history)))
 
 ; замена лица во фразе
 (define (change-person phrase)
