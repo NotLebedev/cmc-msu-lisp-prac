@@ -40,9 +40,12 @@
 
   (if (empty-tree? tree)
       0
-      ;; BFS over nodes of tree. Each iteration gets nodes on next level
-      ;; number of levels and running total of valid nodes
       (let ([low (min r1 r2)] [high (max r1 r2)])
+        ;; BFS over nodes of tree. Each iteration gets nodes on next level
+        ;; number of levels and running total of valid nodes.
+        ;; `level` --list of nodes on current level
+        ;; `i` -- current depth
+        ;; `cnt` -- running total of valid nodes
         (let loop ([level (list tree)] [i 0] [cnt 0])
           (if (or (null? level) (> i high))
               cnt
