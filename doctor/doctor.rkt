@@ -205,3 +205,33 @@
     (let loop ((i (sub1 length)) (result init))
       (if (= i -1) result
           (loop (sub1 i) (f i result (vector-ref vctr i)))))))
+
+
+(define keywords-structure
+  '#( ; Формат : #(#(<ключевое_слово_1> <ключевое_слово_1> ...) #((<ответ_0>) (<ответ_1>) ...))
+    #(#(depressed suicide exams university)
+      #((when you feel depressed, go out for ice cream)
+        (depression is a disease that can be treated)
+        ()))
+
+    #(#(mother father parents brother sister uncle aunt grandma grandpa)
+      #((tell me more about your * , i want to know all about your *)
+        (why do you feel that way about your * ?)
+        (was your * kind to you?)
+        (do you have any fond memories about * ?)
+        (do you have any childhood memories about * ?)
+        (did you always have this feelings towards * ?)))
+
+    #(#(university scheme lections)
+      	#((your education is important)
+          (how much time do you spend on your studies ?)
+          (education isnt easy but the result is worth it)
+          (is your profession interesting to you)))
+
+    #(#(husband wife children mother-in-law cheat cheating)
+      #((your family needs you)
+        (you may be annoyed by your family now, but your mind will change)
+        (your close ones will change mind later)
+        (maybe you should sicuss this with your spouse)))
+
+    #()))
