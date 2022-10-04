@@ -1,4 +1,4 @@
-#lang racket/base
+#lang scheme/base
 
 (provide vector-fold-right)
 

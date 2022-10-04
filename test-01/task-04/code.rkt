@@ -1,4 +1,4 @@
-#lang racket/base
+#lang scheme/base
 
 (require racket/vector racket/list)
 (provide fun4)

@@ -1,4 +1,4 @@
-#lang racket/base
+#lang scheme/base
 
 (require  math/number-theory)
 (provide fun2a fun2b)
