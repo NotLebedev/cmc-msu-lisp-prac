@@ -253,12 +253,33 @@
 ;; Номер ведра для заданного объекта
 (define (bucket-num x)
   (remainder (equal-hash-code x) 256))
-;; Добавляет в ведро новый элемент если он не содержался там ранее
-;; возвращает потенциально обновлённый список
-(define (add-to-bucket i bucket x)
-  (if (member x bucket)
-      bucket
-      (cons x bucket)))
+
+;; Хэш-множество из `buckets-cnt` ячеек внутри каждой из которых
+;; хранится ведро в виде списка со всеми элементами имеющими хэш соответствующий
+;; индексу
+(define (build-set vctr)
+  ;; Добавляет в ведро новый элемент если он не содержался там ранее
+  ;; возвращает потенциально обновлённый список
+  (define (add-to-bucket i bucket x)
+    (if (member x bucket)
+        bucket
+        (cons x bucket)))
+  ;; Строится вектор где для каждого n от 0 до buckets-cnt находятся все такие
+  ;; элементы входжного вектора что их bucket-num соответствует номеру ведра.
+  ;; После чего они сворачиваются в список с проверкой наличия в соответствующем
+  ;; для каждого элемента
+  ;; Если бы разрешены были бы мутаторы, то можно было бы наоборот, идти по списку и
+  ;; пополнять вектор.
+  (build-vector
+   buckets-cnt
+   (λ (bucket) (vector-foldl
+                add-to-bucket
+                '()
+                (vector-filter (λ (x) (= (bucket-num x) bucket)) vctr)))))
+
+;; Проверить, содержит ли множество `cset` заданный элемент
+(define (set-member? cset x)
+  (member x (vector-ref cset (bucket-num x))))
 
 ;; Множество ключевых слов необходимое для проверки наличия ключевого слова в строке
 (define keywords-set
@@ -268,25 +289,11 @@
                       (λ (i accum el) (vector-append accum el))
                       #()
                       (vector-map (λ (x) (vector-ref x 0)) keywords-structure))])
-    ;; Распределим их в "хэш-множество" из 256 ячеек внутри каждой из которых
-    ;; хранится ведро в виде списка со всеми элементами имеющими хэш соответствующий
-    ;; индексу
-    ;; Строится вектор где для каждого n от 0 до buckets-cnt находятся все такие
-    ;; элементы вектора all-keywords что их bucket-num соответствует номеру ведра.
-    ;; После чего они сворачиваются в список с проверкой наличия в соответствующем
-    ;; для каждого элемента
-    ;; Если бы разрешены были бы мутаторы, то можно было бы наоборот, идти по списку и
-    ;; пополнять вектор.
-    (build-vector
-     buckets-cnt
-     (λ (bucket) (vector-foldl
-                  add-to-bucket
-                  '()
-                  (vector-filter (λ (x) (= (bucket-num x) bucket)) all-keywords))))))
+    (build-set all-keywords)))
 
 ;; Проверить, содержит ли keywords-structure-keys заданный элемент
 (define (keywords-set-member? x)
-  (member x (vector-ref keywords-set (bucket-num x))))
+  (set-member? keywords-set x))
 
 ;; Проверка содержатся ли в данном списке ключевые слова
 (define (has-keywords? lst)
