@@ -1,5 +1,5 @@
 ; заготовка "Доктора". Сентябрь 2022
-#lang scheme/base
+#lang racket/base
 (require racket/vector)
 
 ; В учебных целях используется базовая версия Scheme
@@ -125,8 +125,7 @@
   ;; Если какое-то слово встречается несколько раз, то в отфильтрованном
   ;; списке оно также присутствует несколько раз и выбирается с соответственной
   ;; вероятностью
-  (let ([keyword (pick-random-list (filter-keywords user-response))])
-    (list keyword)))
+  (keyword-get-answer (pick-random-list (filter-keywords user-response))))
 
 ; замена лица во фразе
 (define (change-person phrase)
@@ -202,7 +201,7 @@
 
 (define (many-replace-v3.5 replacement-pairs lst)
   (map
-   replace-or-keep
+   (λ (what) (replace-or-keep what replacement-pairs))
    lst))
 
 ; в Racket нет vector-foldl, реализуем для случая с одним вектором (vect-foldl f init vctr)
@@ -246,7 +245,7 @@
       #((your family needs you)
         (you may be annoyed by your * now, but your mind will change)
         (your close ones will change mind later)
-        (maybe you should discuss this with your spouse)))))
+        (maybe you should discuss this with your *)))))
 
 ;; Специальная форма keywords-raw где ключевые слова в каждой категории
 ;; хранятся в множестве, а не списке
@@ -270,7 +269,10 @@
         (set-member? keywords keyword)))
     keywords-structure)))
 
-;;(define (keyword-get-answer keyword))
+(define (keyword-get-answer keyword)
+  (many-replace-v3
+   (list (list '* keyword))
+   (pick-random-vector (keyword-answers keyword))))
 
 ;; Множество ключевых слов необходимое для проверки наличия ключевого слова в строке
 (define keywords-set
