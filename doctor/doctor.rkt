@@ -226,8 +226,7 @@
   '#( ; Формат : #(#(<ключевое_слово_1> <ключевое_слово_1> ...) #((<ответ_0>) (<ответ_1>) ...))
     #(#(depressed suicide exams university)
       #((when you feel depressed, go out for ice cream)
-        (depression is a disease that can be treated)
-        ()))
+        (depression is a disease that can be treated)))
 
     #(#(mother father parents brother sister uncle aunt grandma grandpa)
       #((tell me more about your * , i want to know all about your *)
@@ -243,9 +242,9 @@
           (education isnt easy but the result is worth it)
           (is your profession interesting to you ?)))
 
-    #(#(husband wife children mother-in-law cheat cheating mother)
+    #(#(husband wife children mother-in-law mother father)
       #((your family needs you)
-        (you may be annoyed by your family now, but your mind will change)
+        (you may be annoyed by your * now, but your mind will change)
         (your close ones will change mind later)
         (maybe you should discuss this with your spouse)))))
 
@@ -254,9 +253,24 @@
 (define keywords-structure
   (vector-map
    (λ (group)
-     (let ([keywords (vector-ref group 0)] [options (vector-ref group 1)])
-       (vector (build-set keywords) options)))
+     (let ([keywords (vector-ref group 0)] [answers (vector-ref group 1)])
+       (vector (build-set keywords) answers)))
    keywords-raw))
+
+;; Возвращает вектор ответов подходящих для данного ключевого слова.
+;; Cперва находит все вектора ответов из подходящих групп, затем
+;; объединяет их
+(define (keyword-answers keyword)
+  (vector-foldl
+   (λ (i accum group) (vector-append accum (vector-ref group 1)))
+   #()
+   (vector-filter
+    (λ (group)
+      (let ([keywords (vector-ref group 0)])
+        (set-member? keywords keyword)))
+    keywords-structure)))
+
+;;(define (keyword-get-answer keyword))
 
 ;; Множество ключевых слов необходимое для проверки наличия ключевого слова в строке
 (define keywords-set
