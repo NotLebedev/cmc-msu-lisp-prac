@@ -220,8 +220,9 @@
       (if (= i -1) result
           (loop (sub1 i) (f i result (vector-ref vctr i)))))))
 
-
-(define keywords-structure
+;; "Сырая" запись правил. Она обрабатывается при создании keywords-set и keywords-structre
+;; чтобы поместить ключевые слова в хэш-множества для ускорения поиска и удаления дубликатов
+(define keywords-raw
   '#( ; Формат : #(#(<ключевое_слово_1> <ключевое_слово_1> ...) #((<ответ_0>) (<ответ_1>) ...))
     #(#(depressed suicide exams university)
       #((when you feel depressed, go out for ice cream)
@@ -240,13 +241,51 @@
       	#((your education is important)
           (how much time do you spend on your studies ?)
           (education isnt easy but the result is worth it)
-          (is your profession interesting to you)))
+          (is your profession interesting to you ?)))
 
     #(#(husband wife children mother-in-law cheat cheating mother)
       #((your family needs you)
         (you may be annoyed by your family now, but your mind will change)
         (your close ones will change mind later)
         (maybe you should discuss this with your spouse)))))
+
+;; Специальная форма keywords-raw где ключевые слова в каждой категории
+;; хранятся в множестве, а не списке
+(define keywords-structure
+  (vector-map
+   (λ (group)
+     (let ([keywords (vector-ref group 0)] [options (vector-ref group 1)])
+       (vector (build-set keywords) options)))
+   keywords-raw))
+
+;; Множество ключевых слов необходимое для проверки наличия ключевого слова в строке
+(define keywords-set
+  (let*
+      ;; Найдём вектор всех (возможно повторяющихся) ключевых слов
+      ([all-keywords (vector-foldl
+                      (λ (i accum el) (vector-append accum el))
+                      #()
+                      (vector-map (λ (x) (vector-ref x 0)) keywords-raw))])
+    (build-set all-keywords)))
+
+;; Проверить, содержит ли keywords-set заданный элемент
+(define (keywords-set-member? x)
+  (set-member? keywords-set x))
+
+;; Проверка содержатся ли в данном списке ключевые слова
+(define (has-keywords? lst)
+  (call/cc (λ (cc-exit)
+             (for-each
+              (λ (x) (when (keywords-set-member? x)
+                       (cc-exit #t)))
+              lst)
+             #f)))
+
+(define (filter-keywords lst)
+  (filter keywords-set-member? lst))
+
+
+;; ***** Реализация хэш-множества *****
 
 ;; Множество ведёр в хэш-множествах
 (define buckets-cnt 256)
@@ -280,29 +319,3 @@
 ;; Проверить, содержит ли множество `cset` заданный элемент
 (define (set-member? cset x)
   (member x (vector-ref cset (bucket-num x))))
-
-;; Множество ключевых слов необходимое для проверки наличия ключевого слова в строке
-(define keywords-set
-  (let*
-      ;; Найдём вектор всех (возможно повторяющихся) ключевых слов
-      ([all-keywords (vector-foldl
-                      (λ (i accum el) (vector-append accum el))
-                      #()
-                      (vector-map (λ (x) (vector-ref x 0)) keywords-structure))])
-    (build-set all-keywords)))
-
-;; Проверить, содержит ли keywords-structure-keys заданный элемент
-(define (keywords-set-member? x)
-  (set-member? keywords-set x))
-
-;; Проверка содержатся ли в данном списке ключевые слова
-(define (has-keywords? lst)
-  (call/cc (λ (cc-exit)
-             (for-each
-              (λ (x) (when (keywords-set-member? x)
-                       (cc-exit #t)))
-              lst)
-             #f)))
-
-(define (filter-keywords lst)
-  (filter keywords-set-member? lst))
