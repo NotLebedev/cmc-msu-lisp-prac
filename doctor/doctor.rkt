@@ -91,8 +91,11 @@
 
 ; случайный выбор одного из элементов непустого вектора
 (define (pick-random-vector vctr)
-  (vector-ref vctr (random 0 (vector-length vctr)))
-  )
+  (vector-ref vctr (random 0 (vector-length vctr))))
+
+;; случайный выбор одного из элементов непустого списка
+(define (pick-random-list lst)
+  (list-ref lst (random 0 (length lst))))
 
 ; 2й способ генерации ответной реплики -- замена лица в реплике пользователя и приписывание к результату случайно выбранного нового начала
 (define (qualifier-answer user-response)
@@ -118,7 +121,12 @@
 ;; предложение по заранее подготовленному шаблону, при необходимости
 ;; использовав в нём одно из этих слово
 (define (suggestion-answer user-response)
-  '(suggestion))
+  ;; Выбираем случайное слово из списка ключевых слов в этом ответе.
+  ;; Если какое-то слово встречается несколько раз, то в отфильтрованном
+  ;; списке оно также присутствует несколько раз и выбирается с соответственной
+  ;; вероятностью
+  (let ([keyword (pick-random-list (filter-keywords user-response))])
+    (list keyword)))
 
 ; замена лица во фразе
 (define (change-person phrase)
