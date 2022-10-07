@@ -66,17 +66,16 @@
 (define (reply user-response)
   (case (random 0 2) ; с равной вероятностью выбирается один из двух способов построения ответа
     ((0) (hedge-answer))  ; 1й способ
-    ((1) (qualifier-answer user-response)) ; 2й способ
-
-    )
-  )
+    ((1) (qualifier-answer user-response)))) ; 2й способ
 
 (define (reply-v2 user-response history)
   ;; Рандомит в зависимости от того есть ли в истории хоть что-то
-  (case (random 0 (if (> (vector-length history) 0) 3 2))
-    ((0) (hedge-answer))
-    ((1) (qualifier-answer user-response))
-    ((2) (history-answer history))))
+  ;; и есть ли в ответе ключевые слова
+  (case (random (if (has-keywords? user-response) 0 1) (if (> (vector-length history) 0) 4 3))
+    [(0) (suggestion-answer user-response)]
+    ((1) (hedge-answer))
+    ((2) (qualifier-answer user-response))
+    ((3) (history-answer history))))
 
 ; 1й способ генерации ответной реплики -- случайный выбор одной из заготовленных фраз, не связанных с репликой пользователя
 (define (hedge-answer)
@@ -109,10 +108,17 @@
           )
   )
 
-
+;; 3й способ -- выбор случайной фразы сказанной пациентом ранее
+;; и упоменание, что он её говорил
 (define (history-answer history)
   (append '(earlier you said that)
-          (pick-random-vector history)))
+          (change-person (pick-random-vector history))))
+
+;; 4й способ -- если было ключевые слова, то выбрать одно из них и составить
+;; предложение по заранее подготовленному шаблону, при необходимости
+;; использовав в нём одно из этих слово
+(define (suggestion-answer user-response)
+  '(suggestion))
 
 ; замена лица во фразе
 (define (change-person phrase)
