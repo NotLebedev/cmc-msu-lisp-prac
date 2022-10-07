@@ -273,3 +273,15 @@
 ;; Проверить, содержит ли keywords-structure-keys заданный элемент
 (define (keywords-set-member? x)
   (member x (vector-ref keywords-set (bucket-num x))))
+
+;; Проверка содержатся ли в данном списке ключевые слова
+(define (has-keywords? lst)
+  (call/cc (λ (cc-exit)
+             (for-each
+              (λ (x) (when (keywords-set-member? x)
+                       (cc-exit #t)))
+              lst)
+             #f)))
+
+(define (filter-keywords lst)
+  (filter keywords-set-member? lst))
