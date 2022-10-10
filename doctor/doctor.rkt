@@ -139,6 +139,29 @@
    (λ (config) ((config-get-predicate config) user-response history))
    reply-config))
 
+;; Выбрать индекс из массива в соответствии с его весом
+(define (weighted-select weights)
+  ;; Вычисляем сумарный вес и выбираем число в промежутке от 0 до веса
+  (let* ([total (vector-foldl (λ (i total w) (+ total w)) 0 weights)] [rnd (random 0 total)])
+    (call/cc
+     (λ (cc-exit)
+       ;; Считаем кумулятивные суммы по вектору весов. Как только кумулятивный
+       ;; вес становится больше случайного возвращаем n-1 т.к. предыдущий отрезок
+       ;; был w_{i-2} < rnd < w_{i-1}.
+       (vector-foldl
+        (λ (i cumsum w)
+          (if (> cumsum rnd)
+              (cc-exit (- i 1))
+              (+ cumsum w)))
+        0
+        weights)
+       ;; Если вышли из цикла, то rnd в точности равен максимуму.
+       ;; Т.е. попали в последний отрезок
+       (- (vector-length weights) 1)))))
+
+(define (select-strategy strategies)
+  '())
+
 ; 1й способ генерации ответной реплики -- случайный выбор одной из заготовленных фраз, не связанных с репликой пользователя
 (define (hedge-answer)
   (pick-random-vector '#((please go on)
