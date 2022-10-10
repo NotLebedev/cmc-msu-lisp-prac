@@ -328,7 +328,9 @@
   '#( ; Формат : #(#(<ключевое_слово_1> <ключевое_слово_1> ...) #((<ответ_0>) (<ответ_1>) ...))
     #(#(depressed suicide exams university)
       #((when you feel depressed, go out for ice cream)
-        (depression is a disease that can be treated)))
+        (depression is a disease that can be treated)
+        (hard parts of your life will always end well)
+        (you should reasses your attitude to this problem)))
 
     #(#(mother father parents brother sister uncle aunt grandma grandpa)
       #((tell me more about your * , i want to know all about your *)
@@ -348,7 +350,12 @@
       #((your family needs you)
         (you may be annoyed by your * now, but your mind will change)
         (your close ones will change mind later)
-        (maybe you should discuss this with your *)))))
+        (maybe you should discuss this with your *)))
+
+    #(#(work boss burnout overwoking coworkers)
+      #(you should try and resolve this problem with your manager)
+      #(people often experience problems with * at their work)
+      #(you should talk about * with your superior))))
 
 ;; Специальная форма keywords-raw где ключевые слова в каждой категории
 ;; хранятся в множестве, а не списке
