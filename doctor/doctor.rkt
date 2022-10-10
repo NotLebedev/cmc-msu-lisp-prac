@@ -96,7 +96,7 @@
        (printf "Goodbye, ~a!\n" name)
        (print '(see you next week))]
       [else
-       (print (reply-v1.5 user-response history))
+       (print (reply-v2 user-response history))
        (doctor-driver-loop-v2 name (vector-append history (vector user-response)))])))
 
 ; генерация ответной реплики по user-response -- реплике от пользователя
@@ -114,17 +114,30 @@
     ((2) (qualifier-answer user-response))
     ((3) (history-answer history))))
 
-(define (reply-v2 user-response history)
-  '())
-
 (define reply-config
   ;; Список конфигураций стратегий. Каждый элемент имеет вид:
   ;; #(<предикат применимости> <вес стратегии> <функция, реализующая стратегию>)
-  '#(
-    #((λ lst #t) 1 hedge-answer)
-    #((λ lst #t) 1 qualifier-answer)
-    #((λ (user-response history . lst) (has-keywords? user-response)) 3 suggestion-answer)
-    #((λ (user-response history . lst) (> (vector-length history) 0)) 2 history-answer)))
+  (vector
+   ;; Случайная заготовленная фраза
+   (vector
+    (λ lst #t)
+    1
+    (λ lst (hedge-answer)))
+   ;; Замена лица + случайное начало
+   (vector
+    (λ lst #t)
+    1
+    (λ (user-response . lst) (qualifier-answer user-response)))
+   ;; Если реплика содержит ключевые слова составить ответ по заготовленным шаблонам
+   (vector
+    (λ (user-response . lst) (has-keywords? user-response))
+    5
+    (λ (user-response . lst) (suggestion-answer user-response)))
+   ;; Упомянуть ранее сказанное, заменив лицо в высказывание
+   (vector
+    (λ (user-response history . lst) (> (vector-length history) 0))
+    3
+    (λ (user-response history . lst) (history-answer history)))))
 
 ;; Получить из элемента списка конфигураций предикат применимости
 (define (config-get-predicate config) (vector-ref config 0))
@@ -134,13 +147,13 @@
 (define (config-get-strategy config) (vector-ref config 2))
 
 ;; Вычислить массив стратегий применимых для текущего состояния "доктора"
-(define (get-matching-strategies user-response history)
+(define (get-matching-strategies strategies user-response history)
   (vector-filter
    (λ (config) ((config-get-predicate config) user-response history))
-   reply-config))
+   strategies))
 
 ;; Выбрать индекс из массива в соответствии с его весом
-(define (weighted-select weights)
+(define (pick-random-vector-with-weight weights)
   ;; Вычисляем сумарный вес и выбираем число в промежутке от 0 до веса
   (let* ([total (vector-foldl (λ (i total w) (+ total w)) 0 weights)] [rnd (random 0 total)])
     (call/cc
@@ -159,8 +172,13 @@
        ;; Т.е. попали в последний отрезок
        (- (vector-length weights) 1)))))
 
-(define (select-strategy strategies)
-  '())
+(define (select-strategy strategies user-response history)
+  (let* ([matching (get-matching-strategies strategies user-response history)]
+         [weights (vector-map config-get-weight matching)])
+    (vector-ref matching (pick-random-vector-with-weight weights))))
+
+(define (reply-v2 user-response history)
+  ((config-get-strategy (select-strategy reply-config user-response history)) user-response history))
 
 ; 1й способ генерации ответной реплики -- случайный выбор одной из заготовленных фраз, не связанных с репликой пользователя
 (define (hedge-answer)
