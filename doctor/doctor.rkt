@@ -4,6 +4,43 @@
 
 ; В учебных целях используется базовая версия Scheme
 
+
+;; ***** Реализация хэш-множества *****
+
+;; Множество ведёр в хэш-множествах
+(define buckets-cnt 256)
+;; Номер ведра для заданного объекта
+(define (bucket-num x)
+  (remainder (equal-hash-code x) 256))
+
+;; Хэш-множество из `buckets-cnt` ячеек внутри каждой из которых
+;; хранится ведро в виде списка со всеми элементами имеющими хэш соответствующий
+;; индексу
+(define (build-set vctr)
+  ;; Добавляет в ведро новый элемент если он не содержался там ранее
+  ;; возвращает потенциально обновлённый список
+  (define (add-to-bucket i bucket x)
+    (if (member x bucket)
+        bucket
+        (cons x bucket)))
+  ;; Строится вектор где для каждого n от 0 до buckets-cnt находятся все такие
+  ;; элементы входжного вектора что их bucket-num соответствует номеру ведра.
+  ;; После чего они сворачиваются в список с проверкой наличия в соответствующем
+  ;; для каждого элемента
+  ;; Если бы разрешены были бы мутаторы, то можно было бы наоборот, идти по списку и
+  ;; пополнять вектор.
+  (build-vector
+   buckets-cnt
+   (λ (bucket) (vector-foldl
+                add-to-bucket
+                '()
+                (vector-filter (λ (x) (= (bucket-num x) bucket)) vctr)))))
+
+;; Проверить, содержит ли множество `cset` заданный элемент
+(define (set-member? cset x)
+  (member x (vector-ref cset (bucket-num x))))
+
+
 (define (visit-doctor-v2 stop-word patients-cnt)
   (call/cc
    (λ (cc-exit)
@@ -59,7 +96,7 @@
        (printf "Goodbye, ~a!\n" name)
        (print '(see you next week))]
       [else
-       (print (reply-v2 user-response history))
+       (print (reply-v1.5 user-response history))
        (doctor-driver-loop-v2 name (vector-append history (vector user-response)))])))
 
 ; генерация ответной реплики по user-response -- реплике от пользователя
@@ -68,7 +105,7 @@
     ((0) (hedge-answer))  ; 1й способ
     ((1) (qualifier-answer user-response)))) ; 2й способ
 
-(define (reply-v2 user-response history)
+(define (reply-v1.5 user-response history)
   ;; Рандомит в зависимости от того есть ли в истории хоть что-то
   ;; и есть ли в ответе ключевые слова
   (case (random (if (has-keywords? user-response) 0 1) (if (> (vector-length history) 0) 4 3))
@@ -76,6 +113,31 @@
     ((1) (hedge-answer))
     ((2) (qualifier-answer user-response))
     ((3) (history-answer history))))
+
+(define (reply-v2 user-response history)
+  '())
+
+(define reply-config
+  ;; Список конфигураций стратегий. Каждый элемент имеет вид:
+  ;; #(<предикат применимости> <вес стратегии> <функция, реализующая стратегию>)
+  '#(
+    #((λ lst #t) 1 hedge-answer)
+    #((λ lst #t) 1 qualifier-answer)
+    #((λ (user-response history . lst) (has-keywords? user-response)) 3 suggestion-answer)
+    #((λ (user-response history . lst) (> (vector-length history) 0)) 2 history-answer)))
+
+;; Получить из элемента списка конфигураций предикат применимости
+(define (config-get-predicate config) (vector-ref config 0))
+;; Получить из элемента списка конфигураций вес стратегии
+(define (config-get-weight config) (vector-ref config 1))
+;; Получить из элемента списка конфигураций функцию, реализующую стратегию
+(define (config-get-strategy config) (vector-ref config 2))
+
+;; Вычислить массив стратегий применимых для текущего состояния "доктора"
+(define (get-matching-strategies user-response history)
+  (vector-filter
+   (λ (config) ((config-get-predicate config) user-response history))
+   reply-config))
 
 ; 1й способ генерации ответной реплики -- случайный выбор одной из заготовленных фраз, не связанных с репликой пользователя
 (define (hedge-answer)
@@ -299,39 +361,3 @@
 
 (define (filter-keywords lst)
   (filter keywords-set-member? lst))
-
-
-;; ***** Реализация хэш-множества *****
-
-;; Множество ведёр в хэш-множествах
-(define buckets-cnt 256)
-;; Номер ведра для заданного объекта
-(define (bucket-num x)
-  (remainder (equal-hash-code x) 256))
-
-;; Хэш-множество из `buckets-cnt` ячеек внутри каждой из которых
-;; хранится ведро в виде списка со всеми элементами имеющими хэш соответствующий
-;; индексу
-(define (build-set vctr)
-  ;; Добавляет в ведро новый элемент если он не содержался там ранее
-  ;; возвращает потенциально обновлённый список
-  (define (add-to-bucket i bucket x)
-    (if (member x bucket)
-        bucket
-        (cons x bucket)))
-  ;; Строится вектор где для каждого n от 0 до buckets-cnt находятся все такие
-  ;; элементы входжного вектора что их bucket-num соответствует номеру ведра.
-  ;; После чего они сворачиваются в список с проверкой наличия в соответствующем
-  ;; для каждого элемента
-  ;; Если бы разрешены были бы мутаторы, то можно было бы наоборот, идти по списку и
-  ;; пополнять вектор.
-  (build-vector
-   buckets-cnt
-   (λ (bucket) (vector-foldl
-                add-to-bucket
-                '()
-                (vector-filter (λ (x) (= (bucket-num x) bucket)) vctr)))))
-
-;; Проверить, содержит ли множество `cset` заданный элемент
-(define (set-member? cset x)
-  (member x (vector-ref cset (bucket-num x))))
