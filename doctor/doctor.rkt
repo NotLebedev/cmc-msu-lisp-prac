@@ -7,7 +7,7 @@
 
 ;; ***** Реализация хэш-множества *****
 
-;; Множество ведёр в хэш-множествах
+;; Количество ведёр в хэш-множествах
 (define buckets-cnt 256)
 ;; Номер ведра для заданного объекта
 (define (bucket-num x)
@@ -62,7 +62,7 @@
 ; основная функция, запускающая "Доктора"
 ; параметр name -- имя пациента
 (define (visit-doctor name)
-  (printf "Hello, ~a!\n" name)
+  (printf "(hello, ~a!)\n" name)
   (print '(what seems to be the trouble?))
   (doctor-driver-loop-v2 name #())
   )
@@ -75,7 +75,7 @@
   (let ((user-response (read)))
     (cond
       	    ((equal? user-response '(goodbye)) ; реплика '(goodbye) служит для выхода из цикла
-             (printf "Goodbye, ~a!\n" name)
+             (printf "(goodbye, ~a!)\n" name)
              (print '(see you next week)))
             (else (print (reply user-response)) ; иначе Доктор генерирует ответ, печатает его и продолжает цикл
                   (doctor-driver-loop name)
@@ -93,8 +93,9 @@
   (let ([user-response (read)])
     (cond
       [(equal? user-response '(goodbye))
-       (printf "Goodbye, ~a!\n" name)
-       (print '(see you next week))]
+       (printf "(goodbye, ~a!)\n" name)
+       (print '(see you next week))
+       (display "\n")]
       [else
        (print (reply-v2 user-response history))
        (doctor-driver-loop-v2 name (vector-append history (vector user-response)))])))
@@ -368,9 +369,9 @@
         (maybe you should discuss this with your *)))
 
     #(#(work boss burnout overwoking coworkers)
-      #(you should try and resolve this problem with your manager)
-      #(people often experience problems with * at their work)
-      #(you should talk about * with your superior))))
+      #((you should try and resolve this problem with your manager)
+        (people often experience problems with * at their work)
+        (you should talk about * with your superior)))))
 
 ;; Специальная форма keywords-raw где ключевые слова в каждой категории
 ;; хранятся в множестве, а не списке
