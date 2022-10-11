@@ -114,30 +114,21 @@
     ((2) (qualifier-answer user-response))
     ((3) (history-answer history))))
 
-(define reply-config
-  ;; Список конфигураций стратегий. Каждый элемент имеет вид:
-  ;; #(<предикат применимости> <вес стратегии> <функция, реализующая стратегию>)
-  (vector
-   ;; Случайная заготовленная фраза
-   (vector
-    (λ lst #t)
-    1
-    (λ lst (hedge-answer)))
-   ;; Замена лица + случайное начало
-   (vector
-    (λ lst #t)
-    1
-    (λ (user-response . lst) (qualifier-answer user-response)))
-   ;; Если реплика содержит ключевые слова составить ответ по заготовленным шаблонам
-   (vector
-    (λ (user-response . lst) (has-keywords? user-response))
-    5
-    (λ (user-response . lst) (suggestion-answer user-response)))
-   ;; Упомянуть ранее сказанное, заменив лицо в высказывание
-   (vector
-    (λ (user-response history . lst) (> (vector-length history) 0))
-    3
-    (λ (user-response history . lst) (history-answer history)))))
+;; Сконструировать вектор конфигураций вида
+;; #(#(<предикат применимости> <вес стратегии> <функция, реализующая стратегию>) ... )
+;; из списка агрументов, считая каждую тройку очередным элементом вектора
+(define (build-config . lst)
+  ;; Первые три элемента списка преобразуются в элемент конфигурации
+  ;; В случае если это не (функция, число, функция) выбрасывает ошибку
+  (define (head-to-entry lst)
+    (if (and (procedure? (car lst)) (number? (cadr lst)) (procedure? (caddr lst)))
+        (vector (car lst) (cadr lst) (caddr lst))
+        (error 'wrong-init-types)))
+  ;; Обработать вход по три элемента, первращая каждую тройку в новый элемент вектора
+  (let loop ([rest lst] [res #()])
+    (if (or (null? rest) (null? (cdr rest)) (null? (cddr rest)))
+        res
+        (loop (list-tail rest 3) (vector-append res (vector (head-to-entry rest)))))))
 
 ;; Получить из элемента списка конфигураций предикат применимости
 (define (config-get-predicate config) (vector-ref config 0))
@@ -145,6 +136,30 @@
 (define (config-get-weight config) (vector-ref config 1))
 ;; Получить из элемента списка конфигураций функцию, реализующую стратегию
 (define (config-get-strategy config) (vector-ref config 2))
+
+(define reply-config
+  ;; Список конфигураций стратегий. Каждый элемент имеет вид:
+  ;; #(<предикат применимости> <вес стратегии> <функция, реализующая стратегию>)
+  (build-config
+   ;; Случайная заготовленная фраза
+   (λ lst #t)
+   1
+   (λ lst (hedge-answer))
+
+   ;; Замена лица + случайное начало
+   (λ lst #t)
+   1
+   (λ (user-response . lst) (qualifier-answer user-response))
+
+   ;; Если реплика содержит ключевые слова составить ответ по заготовленным шаблонам
+   (λ (user-response . lst) (has-keywords? user-response))
+   5
+   (λ (user-response . lst) (suggestion-answer user-response))
+
+   ;; Упомянуть ранее сказанное, заменив лицо в высказывание
+   (λ (user-response history . lst) (> (vector-length history) 0))
+   3
+   (λ (user-response history . lst) (history-answer history))))
 
 ;; Вычислить массив стратегий применимых для текущего состояния "доктора"
 (define (get-matching-strategies strategies user-response history)
