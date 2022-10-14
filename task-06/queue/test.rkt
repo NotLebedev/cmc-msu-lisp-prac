@@ -4,7 +4,7 @@
 
 (define (test1)
   (let ([q (make-queue)])
-    (check-true #t (queue? q))))
+    (check-pred queue? q)))
 
 
 (define (test2)
@@ -14,7 +14,7 @@
     (insert-queue! q 3)
     (insert-queue! q 4)
 
-    (check-true #t (queue? q))
+    (check-pred queue? q)
 
     (check-false (empty-queue? q))
     (check-equal? (front-queue q) 1)
@@ -41,7 +41,7 @@
     (insert-queue! q 3)
     (insert-queue! q 4)
 
-    (check-true #t (queue? q))
+    (check-pred queue? q)
 
     (check-false (empty-queue? q))
     (check-equal? (front-queue q) 1)
@@ -61,3 +61,5 @@
 
 
 (test1)
+(test2)
+(test3)

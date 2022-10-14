@@ -17,7 +17,7 @@
   '())
 
 (define (queue? q)
-  (equal? (mlist-ref 0 q) 'type$table))
+  (equal? (mlist-ref q 0) 'type$table))
 
 (define (empty-queue? q)
   '())
