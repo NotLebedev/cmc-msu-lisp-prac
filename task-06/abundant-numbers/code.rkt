@@ -1,7 +1,7 @@
 #lang racket/base
 
 (require math/number-theory)
-(provide sigma-1 even-abundant)
+(provide sigma-1 even-abundant memo-even-abundant)
 
 ;; Calculate sum of divisors of x
 (define (sigma-1 x)
@@ -34,7 +34,7 @@
       [else (loop (+ num 2) i)])))
 
 ;; Hash table with all previous result
-(define even-abundant-mem (make-hash '((0 12))))
+(define even-abundant-mem (make-hash (list (cons 0 12))))
 ;; Max result (index and value) in `even-abundant-mem`, because all results below it
 ;; are known search can resume from this value
 (define even-abundant-mem-max '(0 12))
@@ -58,3 +58,8 @@
     (if mem
         mem
         (calculate x))))
+
+;; Мемоизированная версия даёт выйгрыш в случае любого повторного вызова. Если повторно
+;; запрашивается уже вычисленное значение, то оно будет найдёно в хэш таблице и возвращено,
+;; также если ранее было вычисленно значение для n то при вычислении m > n поиск начнётся с m,
+;; а не с начала.

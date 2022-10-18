@@ -12,5 +12,9 @@
  '(12 18 20 24 30 36 40 42 48 54 56 60 66 70 72 78 80 84 88 90))
 
 (check-equal?
- (map even-abundant (build-list 20 values))
+ (map memo-even-abundant (build-list 20 values))
  '(12 18 20 24 30 36 40 42 48 54 56 60 66 70 72 78 80 84 88 90))
+
+(check-equal?
+ (map memo-even-abundant (reverse (build-list 20 values)))
+ (reverse '(12 18 20 24 30 36 40 42 48 54 56 60 66 70 72 78 80 84 88 90)))
